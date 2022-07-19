@@ -32,6 +32,11 @@
   :type 'integer
   :group 'org-roam-treeview)
 
+(defcustom org-roam-treeview-width 35
+  "The width of Org-roam treeview window."
+  :type 'integer
+  :group 'org-roam-treeview)
+
 (defvar org-roam-treeview-window nil
   "Org-roam treeview window.")
 
@@ -181,7 +186,7 @@ Handles end-of-sublist smartly."
                                          '((side . right)
                                            (slot . 0)
                                            (window-height . fit-window-to-buffer)
-                                           (window-width . 50)
+                                           (window-width . org-roam-treeview-width)
                                            (dedicated . t)))))
   (select-window org-roam-treeview-window)
   (use-local-map org-roam-treeview-map)
