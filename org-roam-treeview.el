@@ -171,6 +171,7 @@ Handles end-of-sublist smartly."
     (define-key map (kbd "<return>") #'org-roam-treeview--open-line)
     (define-key map (kbd "<tab>") #'org-roam-treeview--expand/contract-line)))
 
+;;;###autoload
 (defun org-roam-treeview ()
   "Main entrance to Org-roam treeview."
   (interactive)
