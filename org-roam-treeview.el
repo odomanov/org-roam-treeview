@@ -52,6 +52,12 @@
   "Face for the title."
   :group 'org-roam-treeview)
 
+(defmacro org-roam-treeview-with-writable (&rest forms)
+  "Allow the buffer to be writable and evaluate FORMS."
+  (declare (indent 0) (debug t))
+  `(let ((inhibit-read-only t))
+     ,@forms))
+
 (defun org-roam-treeview--make-line (id level)
   "Create a line with buttons for ID and LEVEL."
   (let* ((item (car (org-roam-db-query
@@ -73,15 +79,15 @@
     (beginning-of-line)
     (if (re-search-forward "\\([-+?]\\)" (line-end-position) t)
 	(org-roam-treeview-with-writable
-	 (goto-char (match-end 1))
-         (backward-char)
-	 (insert-char char 1 t)
-	 (delete-char 1)))))
+	  (goto-char (match-end 1))
+          (backward-char)
+	  (insert-char char 1 t)
+	  (delete-char 1)))))
 
 (defun org-roam-treeview-delete-subblock (level)
   "Delete text from point to levelation level LEVEL or greater.
 Handles end-of-sublist smartly."
-  (speedbar-with-writable
+  (org-roam-treeview-with-writable
     (save-excursion
       (end-of-line) (forward-char 1)
       (let ((start (point)))
@@ -144,12 +150,6 @@ Handles end-of-sublist smartly."
   (interactive)
   (end-of-line)
   (org-roam-treeview--open (previous-button (point) t)))
-
-(defmacro org-roam-treeview-with-writable (&rest forms)
-  "Allow the buffer to be writable and evaluate FORMS."
-  (declare (indent 0) (debug t))
-  `(let ((inhibit-read-only t))
-     ,@forms))
 
 (defun org-roam-treeview--info-function (window obj pos)
   "OBJ should be a button."
