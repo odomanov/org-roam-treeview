@@ -1,0 +1,38 @@
+* org-roam-treeview
+
+This is a simple tree presentation for [[https://www.orgroam.com/][Org-roam]].
+
+** Installation
+
+#+begin_src emacs-lisp
+  (require 'org-roam-treeview)
+#+end_src
+
+Before you use ~org-roam-treeview~ you need to customize or set up a list of ids
+for the starting nodes.  For example:
+#+begin_src emacs-lisp
+  (setq org-roam-treeview-startids '("1cfc93fd-d5d1-4031-9c71-785216bb9f32"))
+#+end_src
+
+Or use ~straight~ (or ~use-package~):
+#+begin_src emacs-lisp
+  (use-package org-roam-treeview
+    :straight (org-roam-treeview :type git :host github :repo "/odomanov/org-roam-treeview")
+    :after org-roam
+    :config
+    (setq org-roam-treeview-startids '("1cfc93fd-d5d1-4031-9c71-785216bb9f32"
+                                       "d38820a6-e63c-47b3-9191-a5813f57bb8a")))
+#+end_src
+
+After that launch ~org-roam-treeview~. 
+
+** Commands
+
+- TAB :: Expand/contract the current node.
+- RET :: Open the file corresponding to the current node.
+- <, > :: Enlarge/Shrink the window.
+- q :: Bury the Org-roam Treemacs buffer
+- Q :: Kill the Org-roam Treemacs buffer
+
+You may use the mouse as well.
+
