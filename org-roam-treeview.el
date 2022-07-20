@@ -200,7 +200,8 @@ Handles end-of-sublist smartly."
   (dolist (id (reverse org-roam-treeview-startids))
     (org-roam-treeview--make-line id 0))
   (setq buffer-read-only t
-        cursor-type nil))
+        cursor-type nil)
+  (show-paren-local-mode -1))
 
 (org-roam-treeview--install)
 
