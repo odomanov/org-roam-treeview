@@ -21,7 +21,9 @@ Or use ~straight~ (or ~use-package~):
     :after org-roam
     :config
     (setq org-roam-treeview-startids '("1cfc93fd-d5d1-4031-9c71-785216bb9f32"
-                                       "d38820a6-e63c-47b3-9191-a5813f57bb8a")))
+                                       "d38820a6-e63c-47b3-9191-a5813f57bb8a"))
+    (define-key org-roam-treeview-map "й" #'bury-buffer)
+    (define-key org-roam-treeview-map "Й" #'kill-this-buffer))
 #+end_src
 
 After that launch ~org-roam-treeview~. 
@@ -36,3 +38,13 @@ After that launch ~org-roam-treeview~.
 
 You may use the mouse as well.
 
+** Customization
+
+- ~org-roam-treeview-startids~ :: The list of node IDs for the
+  initial display.  The default is ~nil~, so you need to set up the list to
+  see anything in the beginning.
+- ~org-roam-treeview-map~ :: The keymap used.  It can be configured after
+  the package loading.
+- ~org-roam-treeview-width~ :: The initial width of the Org-roam treeview window.
+- ~org-roam-treeview-indent~ :: The indentation of treeview levels.
+  The default is ~2~.
