@@ -59,6 +59,9 @@
     map)
   "Org-roam treeview keymap.")
 
+(defvar org-roam-treeview--buffer-name "Org-roam treeview"
+  "The name of Org-roam Treeview buffer.")
+
 (define-button-type 'org-roam-treeview-expand
     'action #'org-roam-treeview--expand/contract
     'face nil
@@ -180,43 +183,100 @@ Handles end-of-sublist smartly."
   (org-roam-treeview-with-writable
    (button-label obj)))
 
+(defun org-roam-treeview--popup-window (buffer)
+  "Create the window."
+  (message "POP:BUF=%S : %S" buffer (get-buffer buffer))
+  (let* ((buf (get-buffer buffer))
+         (win (display-buffer-in-side-window
+               buf '((side . right)
+                     (slot . -1)
+                     (window-height . fit-window-to-buffer)
+                     (window-width . 35) ;org-roam-treeview-width)
+                     ))))
+    (select-window win))
+  (use-local-map org-roam-treeview-map))
+
+(defun org-roam-treeview--init ()
+  "Initialize the buffer."
+  ;; (org-roam-treeview--popup-window org-roam-treeview--buffer-name)
+  (let ((buf (get-buffer-create org-roam-treeview--buffer-name)))
+    (with-current-buffer buf
+      (erase-buffer)
+      (toggle-truncate-lines 1)
+      (show-paren-local-mode -1)
+      ;; (let ((start (point)))
+      ;;   (insert "   =-=  Org-roam  =-=   \n")
+      ;;   (set-text-properties start (point) '(face org-roam-treeview-title)))
+      ;; (setq title "   =-=  Org-roam  =-=   ")
+      ;; (propertize title 'face 'org-roam-treeview-title)
+      ;; (setq-local header-line-format (format title))
+      (setq-local header-line-format (format "   =-=  Org-roam  =-=   "))
+      (setq-local mode-line-format (format "Org-roam: %s" org-roam-directory))
+      (dolist (id (reverse org-roam-treeview-startids))
+        (org-roam-treeview--make-line id 0))
+      (setq buffer-read-only t
+            cursor-type nil))
+    buf))
+
+
 
 ;;;;;;;; Install function
 
 ;;;###autoload
 (defun org-roam-treeview ()
-  "Main entrance to Org-roam treeview."
+  "Main entrance to Org-roam Treeview."
   (interactive)
-  (let ((buf (get-buffer-create "Org-roam treeview")))
-    (setq org-roam-treeview-window
-          (display-buffer-in-side-window buf
-                                         '((side . right)
-                                           (slot . 0)
-                                           (window-height . fit-window-to-buffer)
-                                           (window-width . org-roam-treeview-width)
-                                           (dedicated . t)))))
-  (select-window org-roam-treeview-window)
-  (use-local-map org-roam-treeview-map)
-  (erase-buffer)
-  (toggle-truncate-lines 1)
-  (setq-local mode-line-format (format "Org-roam: %s" org-roam-directory))
-  (let ((start (point)))
-    (insert "  =-=  Org-roam  =-=  \n")
-    (set-text-properties start (point) '(face org-roam-treeview-title)))
-  (dolist (id (reverse org-roam-treeview-startids))
-    (org-roam-treeview--make-line id 0))
-  (setq buffer-read-only t
-        cursor-type nil)
-  (show-paren-local-mode -1))
+  (let* ((buf-name org-roam-treeview--buffer-name)
+         (buf (get-buffer buf-name)))
+    (message "NAME=%S BUF=%S" buf-name buf)
+    (cond ((get-buffer-window buf-name)  ;window is visible
+           (message "  VISIBLE")
+           (select-window (get-buffer-window buf-name)))
+          ((get-buffer buf-name)         ;buffer is buried
+           (message "  BURIED")
+           (org-roam-treeview--popup-window buf-name))
+          (t                             ;no buffer
+           (message "  NOBUF")
+           (org-roam-treeview--init)
+           (org-roam-treeview--popup-window buf-name)))))
+  ;;   (if buf
+  ;;       (progn
+  ;;         (message "buf=%S" buf)
+  ;;         (setq org-roam-treeview-window (get-buffer-window buf))
+  ;;         (message "setq WIN=%S" org-roam-treeview-window)
+  ;;         (setq dbuf buf))
+  ;;     (let ((buf (get-buffer-create buf-name)))
+  ;;       (setq org-roam-treeview-window
+  ;;             (display-buffer-in-side-window buf
+  ;;                                            '((side . right)
+  ;;                                              (slot . -1)
+  ;;                                              (window-height . fit-window-to-buffer)
+  ;;                                              (window-width . org-roam-treeview-width)
+  ;;                                              ;; (dedicated . t)
+  ;;                                              )))
+  ;;       (setq dbuf buf))))
+  ;; (display-buffer dbuf)
+  ;; (message "WIN=%S" org-roam-treeview-window)
+  ;; (select-window org-roam-treeview-window)
+  ;; (use-local-map org-roam-treeview-map)
+  ;; ;; (local-unset-key (kbd "<left>")) 
+  ;; ;; (local-unset-key (kbd "<right>")) 
+  ;; (erase-buffer)
+  ;; (toggle-truncate-lines 1)
+  ;; (show-paren-local-mode -1)
+  ;; ;; (let ((start (point)))
+  ;; ;;   (insert "   =-=  Org-roam  =-=   \n")
+  ;; ;;   (set-text-properties start (point) '(face org-roam-treeview-title)))
+  ;; ;; (setq title "   =-=  Org-roam  =-=   ")
+  ;; ;; (propertize title 'face 'org-roam-treeview-title)
+  ;; ;; (setq-local header-line-format (format title))
+  ;; (setq-local header-line-format (format "   =-=  Org-roam  =-=   "))
+  ;; (setq-local mode-line-format (format "Org-roam: %s" org-roam-directory))
+  ;; (dolist (id (reverse org-roam-treeview-startids))
+  ;;   (org-roam-treeview--make-line id 0))
+  ;; (setq buffer-read-only t
+  ;;       cursor-type nil))
 
-
-(set-keymap-parent org-roam-treeview-map button-buffer-map)
-(define-key org-roam-treeview-map "q" #'bury-buffer)
-(define-key org-roam-treeview-map "Q" #'kill-this-buffer)
-(define-key org-roam-treeview-map "<" #'enlarge-window-horizontally)
-(define-key org-roam-treeview-map ">" #'shrink-window-horizontally)
-(define-key org-roam-treeview-map (kbd "<return>") #'org-roam-treeview--open-line)
-(define-key org-roam-treeview-map (kbd "<tab>") #'org-roam-treeview--expand/contract-line)
 
 (provide 'org-roam-treeview)
 
