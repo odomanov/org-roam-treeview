@@ -37,8 +37,12 @@
   :type 'integer
   :group 'org-roam-treeview)
 
+
 (defvar org-roam-treeview-window nil
   "Org-roam treeview window.")
+
+(defvar org-roam-treeview-map (make-sparse-keymap)
+  "Org-roam treeview keymap.")
 
 (define-button-type 'org-roam-treeview-expand
     'action #'org-roam-treeview--expand/contract
@@ -113,14 +117,14 @@ Handles end-of-sublist smartly."
                          `[:select  [dest] :from links
                                     :where (= links:source $s1)] id)))
              (dolist (dest dests)
-               (setq item (org-roam-db-query
-                           `[:select  [file title id] :from nodes
-                                      :where (= nodes:id $s1)] (car dest)))
+               (setq items (org-roam-db-query
+                            `[:select  [id] :from nodes
+                                       :where (= nodes:id $s1)] (car dest)))
 	       (org-roam-treeview-with-writable
 	        (save-excursion
 	          (end-of-line) (forward-char)
-                  (dolist (i item)
-                    (org-roam-treeview--make-line (caddr i) (1+ level))))))))
+                  (dolist (item items)
+                    (org-roam-treeview--make-line (car item) (1+ level))))))))
 	  ((string-match "-" text)	;we have to contract this node
 	   (org-roam-treeview-change-expand-button-char ?+)
 	   (org-roam-treeview-delete-subblock level))
@@ -164,18 +168,6 @@ Handles end-of-sublist smartly."
 
 ;;;;;;;; Install function
 
-(defun org-roam-treeview--install ()
-  "Install Org-roam treeview."
-  (setq org-roam-treeview-map (make-sparse-keymap))
-  (let ((map org-roam-treeview-map))
-    (set-keymap-parent map button-buffer-map)
-    (define-key map "q" #'bury-buffer)
-    (define-key map "Q" #'kill-this-buffer)
-    (define-key map "<" #'enlarge-window-horizontally)
-    (define-key map ">" #'shrink-window-horizontally)
-    (define-key map (kbd "<return>") #'org-roam-treeview--open-line)
-    (define-key map (kbd "<tab>") #'org-roam-treeview--expand/contract-line)))
-
 ;;;###autoload
 (defun org-roam-treeview ()
   "Main entrance to Org-roam treeview."
@@ -194,16 +186,22 @@ Handles end-of-sublist smartly."
   (toggle-truncate-lines 1)
   (setq-local mode-line-format (format "Org-roam: %s" org-roam-directory))
   (let ((start (point)))
-    (insert "  =-= Org-roam =-=  \n")
+    (insert "  =-=  Org-roam  =-=  \n")
     (set-text-properties start (point) '(face org-roam-treeview-title)))
-  ;; (insert (propertize "  =-= Org-roam =-=  \n" 'face 'org-roam-treeview-title))
   (dolist (id (reverse org-roam-treeview-startids))
     (org-roam-treeview--make-line id 0))
   (setq buffer-read-only t
         cursor-type nil)
   (show-paren-local-mode -1))
 
-(org-roam-treeview--install)
+
+(set-keymap-parent org-roam-treeview-map button-buffer-map)
+(define-key org-roam-treeview-map "q" #'bury-buffer)
+(define-key org-roam-treeview-map "Q" #'kill-this-buffer)
+(define-key org-roam-treeview-map "<" #'enlarge-window-horizontally)
+(define-key org-roam-treeview-map ">" #'shrink-window-horizontally)
+(define-key org-roam-treeview-map (kbd "<return>") #'org-roam-treeview--open-line)
+(define-key org-roam-treeview-map (kbd "<tab>") #'org-roam-treeview--expand/contract-line)
 
 (provide 'org-roam-treeview)
 
