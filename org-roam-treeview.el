@@ -34,9 +34,9 @@
   :type 'integer
   :group 'org-roam-treeview)
 
-(defcustom org-roam-treeview-width 35
-  "The width of Org-roam treeview window."
-  :type 'integer
+(defcustom org-roam-treeview-width 20
+  "The width of Org-roam treeview window.  Can be Integer or Real."
+  :type '(set integer float)
   :group 'org-roam-treeview)
 
 
