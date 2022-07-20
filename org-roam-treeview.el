@@ -2,7 +2,9 @@
 
 ;; Author: Oleg Domanov <odomanov@yandex.ru>
 ;; Version: 1.0
-;; Keywords: org-roam tree
+;; Keywords: outlines org-roam 
+;; Package-Requires: ((org-roam))
+;; URL: https://github.com/odomanov/org-roam-treeview
 
 ;;; Commentary:
 
@@ -41,7 +43,20 @@
 (defvar org-roam-treeview-window nil
   "Org-roam treeview window.")
 
-(defvar org-roam-treeview-map (make-sparse-keymap)
+(defvar org-roam-treeview-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map button-buffer-map)
+    (define-key map "q" #'bury-buffer)
+    (define-key map "Q" #'kill-this-buffer)
+    (define-key map "<" #'enlarge-window-horizontally)
+    (define-key map ">" #'shrink-window-horizontally)
+    (define-key map (kbd "<return>") #'org-roam-treeview--open-line)
+    (define-key map (kbd "<tab>") #'org-roam-treeview--expand/contract-line)
+    ;; (define-key map (kbd "<left>") nil) 
+    ;; (define-key map (kbd "<right>") nil) 
+    ;; (local-unset-key (kbd "<left>")) 
+    ;; (local-unset-key (kbd "<right>"))
+    map)
   "Org-roam treeview keymap.")
 
 (define-button-type 'org-roam-treeview-expand
@@ -117,14 +132,14 @@ Handles end-of-sublist smartly."
                          `[:select  [dest] :from links
                                     :where (= links:source $s1)] id)))
              (dolist (dest dests)
-               (setq items (org-roam-db-query
-                            `[:select  [id] :from nodes
-                                       :where (= nodes:id $s1)] (car dest)))
-	       (org-roam-treeview-with-writable
-	        (save-excursion
-	          (end-of-line) (forward-char)
-                  (dolist (item items)
-                    (org-roam-treeview--make-line (car item) (1+ level))))))))
+               (let ((items (org-roam-db-query
+                             `[:select  [id] :from nodes
+                                        :where (= nodes:id $s1)] (car dest))))
+	         (org-roam-treeview-with-writable
+	           (save-excursion
+	             (end-of-line) (forward-char)
+                     (dolist (item items)
+                       (org-roam-treeview--make-line (car item) (1+ level)))))))))
 	  ((string-match "-" text)	;we have to contract this node
 	   (org-roam-treeview-change-expand-button-char ?+)
 	   (org-roam-treeview-delete-subblock level))
