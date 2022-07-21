@@ -35,7 +35,7 @@
   :type 'integer
   :group 'org-roam-treeview)
 
-(defcustom org-roam-treeview-width 20
+(defcustom org-roam-treeview-width .25
   "The starting width of Org-roam Treeview window.
 Can be Integer or Real [0.0..1.0]."
   :type '(set integer float)
@@ -54,7 +54,7 @@ Can be Integer or Real [0.0..1.0]."
     map)
   "Org-roam Treeview keymap.")
 
-(defvar org-roam-treeview--buffer-name "Org-roam Treeview"
+(defconst org-roam-treeview--buffer-name "Org-roam Treeview"
   "The name of the Org-roam Treeview buffer.")
 
 (defvar org-roam-treeview--current-width 
