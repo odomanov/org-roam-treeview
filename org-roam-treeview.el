@@ -212,6 +212,8 @@ Handles end-of-sublist smartly."
                      (slot . -1)
                      (window-height . fit-window-to-buffer)
                      ;; (window-width . 0.25) ;org-roam-treeview-width)
+                     (window-parameters . ((no-other-window . t)
+                                           (no-delete-other-windows . t)))
                      ))))
     (select-window win)
     (when (not org-roam-treeview--current-width)
