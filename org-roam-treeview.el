@@ -231,12 +231,6 @@ Handles end-of-sublist smartly."
       (toggle-truncate-lines 1)
       (show-paren-local-mode -1)
       (font-lock-mode -1)
-      ;; (let ((start (point)))
-      ;;   (insert "   =-=  Org-roam  =-=   \n")
-      ;;   (set-text-properties start (point) '(face org-roam-treeview-title)))
-      ;; (setq title "   =-=  Org-roam  =-=   ")
-      ;; (propertize title 'face 'org-roam-treeview-title)
-      ;; (setq-local header-line-format (format title))
       (setq-local header-line-format
                   (format-mode-line (format "    Org-roam") 'org-roam-treeview-title))
       (setq-local mode-line-format (format "Org-roam: %s" org-roam-directory))
