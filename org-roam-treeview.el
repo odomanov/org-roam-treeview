@@ -45,8 +45,8 @@ Can be Integer or Real [0.0..1.0]."
 (defvar org-roam-treeview-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map button-buffer-map)
-    (define-key map "q" #'bury-buffer)
-    (define-key map "Q" #'kill-this-buffer)
+    (define-key map "q" #'org-roam-treeview--bury-buffer)
+    (define-key map "Q" #'org-roam-treeview--kill-buffer)
     (define-key map "<" #'enlarge-window-horizontally)
     (define-key map ">" #'shrink-window-horizontally)
     (define-key map (kbd "<return>") #'org-roam-treeview--open-line)
@@ -57,8 +57,8 @@ Can be Integer or Real [0.0..1.0]."
 (defconst org-roam-treeview--buffer-name "Org-roam Treeview"
   "The name of the Org-roam Treeview buffer.")
 
-(defvar org-roam-treeview--current-width 
-  "The current width of the Org-roam Treeview window.")
+(defvar org-roam-treeview--current-width nil 
+  "The current width of the Org-roam Treeview window.  Always integer.")
 
 (define-button-type 'org-roam-treeview-expand
     'action #'org-roam-treeview--expand/contract
@@ -82,6 +82,18 @@ Can be Integer or Real [0.0..1.0]."
   (declare (indent 0) (debug t))
   `(let ((inhibit-read-only t))
      ,@forms))
+
+(defun org-roam-treeview--bury-buffer ()
+  "Set the current window-width and bury the buffer"
+  (interactive)
+  (setq org-roam-treeview--current-width (window-width))
+  (bury-buffer))
+
+(defun org-roam-treeview--kill-buffer ()
+  "Set the current window-width and kill the buffer"
+  (interactive)
+  (setq org-roam-treeview--current-width (window-width))
+  (kill-this-buffer))
 
 (defun org-roam-treeview--make-line (id level)
   "Create a line with buttons for ID on the level LEVEL."
@@ -182,16 +194,31 @@ Handles end-of-sublist smartly."
   (org-roam-treeview-with-writable
    (button-label obj)))
 
+(defun org-roam-treeview-set-width (width)
+  "Set the width of Org-roam Treeview window to WIDTH."
+  (let ((w (max width window-min-width)))
+    (cond
+      ((> (window-width) w)
+       (shrink-window-horizontally  (- (window-width) w)))
+      ((< (window-width) w)
+       (enlarge-window-horizontally (- w (window-width)))))))
+
 (defun org-roam-treeview--popup-window (buffer-or-name)
   "Create and select the Org-roam Treeview window for existing BUFFER-OR-NAME."
   (let* ((buf (get-buffer buffer-or-name))
+         (ww (window-width))
          (win (display-buffer-in-side-window
                buf '((side . right)
                      (slot . -1)
                      (window-height . fit-window-to-buffer)
-                     (window-width . org-roam-treeview-width)
+                     ;; (window-width . 0.25) ;org-roam-treeview-width)
                      ))))
-    (select-window win))
+    (select-window win)
+    (when (not org-roam-treeview--current-width)
+      (setq org-roam-treeview--current-width (if (floatp org-roam-treeview-width)
+                                                 (floor (* org-roam-treeview-width ww))
+                                               org-roam-treeview-width)))
+    (org-roam-treeview-set-width org-roam-treeview--current-width))
   (use-local-map org-roam-treeview-map))
 
 (defun org-roam-treeview--init ()
