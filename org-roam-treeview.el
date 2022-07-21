@@ -1,9 +1,9 @@
 ;;; org-roam-treeview.el --- Tree view display for Org-roam
 
 ;; Author: Oleg Domanov <odomanov@yandex.ru>
-;; Version: 1.0
+;; Package-Version: 1.0
+;; Package-Requires: (org-roam dash)
 ;; Keywords: outlines org-roam 
-;; Package-Requires: ((org-roam))
 ;; URL: https://github.com/odomanov/org-roam-treeview
 
 ;;; Commentary:
@@ -15,7 +15,7 @@
 ;;;    TAB   - Expand/contract the current node.
 ;;;    RET   - Open the file corresponding to the current node.
 ;;;    <, >  - Enlarge/Shrink the window.
-;;;    q     - Bury the buffer
+;;;    q     - Hide the buffer
 ;;;    Q     - Kill the buffer
 ;;;
 ;;;  You may use the mouse as well.
@@ -23,25 +23,24 @@
 ;;; Code:
 
 (require 'org-roam)
+(require 'dash)
 
 (defcustom org-roam-treeview-startids nil
-  "The initial IDs for Org-roam treeview."
+  "A list of initial IDs for Org-roam Treeview."
   :type '(repeat string)
   :group 'org-roam-treeview)
 
 (defcustom org-roam-treeview-indent 2
-  "Level indent for Org-roam treeview."
+  "Level indent for Org-roam Treeview."
   :type 'integer
   :group 'org-roam-treeview)
 
 (defcustom org-roam-treeview-width 20
-  "The width of Org-roam treeview window.  Can be Integer or Real."
+  "The starting width of Org-roam Treeview window.
+Can be Integer or Real [0.0..1.0]."
   :type '(set integer float)
   :group 'org-roam-treeview)
 
-
-(defvar org-roam-treeview-window nil
-  "Org-roam treeview window.")
 
 (defvar org-roam-treeview-map
   (let ((map (make-sparse-keymap)))
@@ -52,15 +51,14 @@
     (define-key map ">" #'shrink-window-horizontally)
     (define-key map (kbd "<return>") #'org-roam-treeview--open-line)
     (define-key map (kbd "<tab>") #'org-roam-treeview--expand/contract-line)
-    ;; (define-key map (kbd "<left>") nil) 
-    ;; (define-key map (kbd "<right>") nil) 
-    ;; (local-unset-key (kbd "<left>")) 
-    ;; (local-unset-key (kbd "<right>"))
     map)
-  "Org-roam treeview keymap.")
+  "Org-roam Treeview keymap.")
 
-(defvar org-roam-treeview--buffer-name "Org-roam treeview"
-  "The name of Org-roam Treeview buffer.")
+(defvar org-roam-treeview--buffer-name "Org-roam Treeview"
+  "The name of the Org-roam Treeview buffer.")
+
+(defvar org-roam-treeview--current-width 
+  "The current width of the Org-roam Treeview window.")
 
 (define-button-type 'org-roam-treeview-expand
     'action #'org-roam-treeview--expand/contract
@@ -86,7 +84,7 @@
      ,@forms))
 
 (defun org-roam-treeview--make-line (id level)
-  "Create a line with buttons for ID and LEVEL."
+  "Create a line with buttons for ID on the level LEVEL."
   (let* ((item (car (org-roam-db-query
                      `[:select  [file title id] :from nodes
                                 :where (= nodes:id $s1)] id)))
@@ -100,7 +98,7 @@
       (insert-button text :type 'org-roam-treeview-link :file file :id id :level level)
       (insert "\n"))))
 
-(defun org-roam-treeview-change-expand-button-char (char)
+(defun org-roam-treeview--change-expand-button-char (char)
   "Change the expansion button character to CHAR for the current line."
   (save-excursion
     (beginning-of-line)
@@ -111,26 +109,26 @@
 	  (insert-char char 1 t)
 	  (delete-char 1)))))
 
-(defun org-roam-treeview-delete-subblock (level)
+(defun org-roam-treeview--delete-subblock (level)
   "Delete text from point to levelation level LEVEL or greater.
 Handles end-of-sublist smartly."
   (org-roam-treeview-with-writable
     (save-excursion
-      (end-of-line) (forward-char 1)
+      (end-of-line) (forward-char)
       (let ((start (point)))
 	(while (and (not (eobp))
                     (> (button-get (next-button (point)) :level) level))
-	  (forward-line 1)
+	  (forward-line)
 	  (beginning-of-line))
 	(delete-region start (point))))))
 
 (defun org-roam-treeview--expand/contract (button)
-  "Expanding/contracting the BUTTON item."
+  "Expand or contract the BUTTON item."
   (let* ((text  (button-label button))
          (id    (button-get button :id))
          (level (button-get button :level)))
     (cond ((string-match "\\+" text)	;we have to expand this node
-	   (org-roam-treeview-change-expand-button-char ?-)
+	   (org-roam-treeview--change-expand-button-char ?-)
            (let ((dests (org-roam-db-query
                          `[:select  [dest] :from links
                                     :where (= links:source $s1)] id)))
@@ -144,19 +142,20 @@ Handles end-of-sublist smartly."
                      (dolist (item items)
                        (org-roam-treeview--make-line (car item) (1+ level)))))))))
 	  ((string-match "-" text)	;we have to contract this node
-	   (org-roam-treeview-change-expand-button-char ?+)
-	   (org-roam-treeview-delete-subblock level))
+	   (org-roam-treeview--change-expand-button-char ?+)
+	   (org-roam-treeview--delete-subblock level))
 	  (t (error "Ooops...  not sure what to do")))))
 
 (defun org-roam-treeview--expand/contract-line ()
-  "Expand/contract the current line."
+  "Expand or contract the current line."
   (interactive)
   (beginning-of-line)
   (org-roam-treeview--expand/contract (next-button (point) t)))
 
-(defun org-roam-treeview-get-focus ()
-  "Get the focus"
-  (select-window org-roam-treeview-window))
+(defun org-roam-treeview--get-focus ()
+  "Get the focus.  Org-roam Treeview window should be visible."
+  (let ((win (get-buffer-window org-roam-treeview--buffer-name)))
+    (select-window win)))
 
 (defun org-roam-treeview--open (button)
   "Open file with id extracted from BUTTON"
@@ -168,7 +167,7 @@ Handles end-of-sublist smartly."
         ((org-roam-node-file node)
          (org-mark-ring-push)
          (org-roam-node-visit node nil 'force)
-         (org-roam-treeview-get-focus)
+         (org-roam-treeview--get-focus)
          t)
         (t nil)))))
 
@@ -178,39 +177,39 @@ Handles end-of-sublist smartly."
   (end-of-line)
   (org-roam-treeview--open (previous-button (point) t)))
 
-(defun org-roam-treeview--info-function (window obj pos)
-  "OBJ should be a button."
+(defun org-roam-treeview--info-function (_window obj _pos)
+  "Get tooltip info.  OBJ should be a button."
   (org-roam-treeview-with-writable
    (button-label obj)))
 
-(defun org-roam-treeview--popup-window (buffer)
-  "Create the window."
-  (message "POP:BUF=%S : %S" buffer (get-buffer buffer))
-  (let* ((buf (get-buffer buffer))
+(defun org-roam-treeview--popup-window (buffer-or-name)
+  "Create and select the Org-roam Treeview window for existing BUFFER-OR-NAME."
+  (let* ((buf (get-buffer buffer-or-name))
          (win (display-buffer-in-side-window
                buf '((side . right)
                      (slot . -1)
                      (window-height . fit-window-to-buffer)
-                     (window-width . 35) ;org-roam-treeview-width)
+                     (window-width . org-roam-treeview-width)
                      ))))
     (select-window win))
   (use-local-map org-roam-treeview-map))
 
 (defun org-roam-treeview--init ()
   "Initialize the buffer."
-  ;; (org-roam-treeview--popup-window org-roam-treeview--buffer-name)
   (let ((buf (get-buffer-create org-roam-treeview--buffer-name)))
     (with-current-buffer buf
       (erase-buffer)
       (toggle-truncate-lines 1)
       (show-paren-local-mode -1)
+      (font-lock-mode -1)
       ;; (let ((start (point)))
       ;;   (insert "   =-=  Org-roam  =-=   \n")
       ;;   (set-text-properties start (point) '(face org-roam-treeview-title)))
       ;; (setq title "   =-=  Org-roam  =-=   ")
       ;; (propertize title 'face 'org-roam-treeview-title)
       ;; (setq-local header-line-format (format title))
-      (setq-local header-line-format (format "   =-=  Org-roam  =-=   "))
+      (setq-local header-line-format
+                  (format-mode-line (format "    Org-roam") 'org-roam-treeview-title))
       (setq-local mode-line-format (format "Org-roam: %s" org-roam-directory))
       (dolist (id (reverse org-roam-treeview-startids))
         (org-roam-treeview--make-line id 0))
@@ -227,55 +226,15 @@ Handles end-of-sublist smartly."
   "Main entrance to Org-roam Treeview."
   (interactive)
   (let* ((buf-name org-roam-treeview--buffer-name)
-         (buf (get-buffer buf-name)))
-    (message "NAME=%S BUF=%S" buf-name buf)
-    (cond ((get-buffer-window buf-name)  ;window is visible
-           (message "  VISIBLE")
-           (select-window (get-buffer-window buf-name)))
-          ((get-buffer buf-name)         ;buffer is buried
-           (message "  BURIED")
+         (buf (get-buffer buf-name))
+         (win (get-buffer-window buf-name)))
+    (cond (win                           ;window is visible
+           (select-window win))
+          (buf                           ;buffer exists
            (org-roam-treeview--popup-window buf-name))
           (t                             ;no buffer
-           (message "  NOBUF")
            (org-roam-treeview--init)
            (org-roam-treeview--popup-window buf-name)))))
-  ;;   (if buf
-  ;;       (progn
-  ;;         (message "buf=%S" buf)
-  ;;         (setq org-roam-treeview-window (get-buffer-window buf))
-  ;;         (message "setq WIN=%S" org-roam-treeview-window)
-  ;;         (setq dbuf buf))
-  ;;     (let ((buf (get-buffer-create buf-name)))
-  ;;       (setq org-roam-treeview-window
-  ;;             (display-buffer-in-side-window buf
-  ;;                                            '((side . right)
-  ;;                                              (slot . -1)
-  ;;                                              (window-height . fit-window-to-buffer)
-  ;;                                              (window-width . org-roam-treeview-width)
-  ;;                                              ;; (dedicated . t)
-  ;;                                              )))
-  ;;       (setq dbuf buf))))
-  ;; (display-buffer dbuf)
-  ;; (message "WIN=%S" org-roam-treeview-window)
-  ;; (select-window org-roam-treeview-window)
-  ;; (use-local-map org-roam-treeview-map)
-  ;; ;; (local-unset-key (kbd "<left>")) 
-  ;; ;; (local-unset-key (kbd "<right>")) 
-  ;; (erase-buffer)
-  ;; (toggle-truncate-lines 1)
-  ;; (show-paren-local-mode -1)
-  ;; ;; (let ((start (point)))
-  ;; ;;   (insert "   =-=  Org-roam  =-=   \n")
-  ;; ;;   (set-text-properties start (point) '(face org-roam-treeview-title)))
-  ;; ;; (setq title "   =-=  Org-roam  =-=   ")
-  ;; ;; (propertize title 'face 'org-roam-treeview-title)
-  ;; ;; (setq-local header-line-format (format title))
-  ;; (setq-local header-line-format (format "   =-=  Org-roam  =-=   "))
-  ;; (setq-local mode-line-format (format "Org-roam: %s" org-roam-directory))
-  ;; (dolist (id (reverse org-roam-treeview-startids))
-  ;;   (org-roam-treeview--make-line id 0))
-  ;; (setq buffer-read-only t
-  ;;       cursor-type nil))
 
 
 (provide 'org-roam-treeview)
