@@ -45,8 +45,8 @@ Can be Integer or Real [0.0..1.0]."
 (defvar org-roam-treeview-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map button-buffer-map)
-    (define-key map "q" #'org-roam-treeview--bury-buffer)
-    (define-key map "Q" #'org-roam-treeview--kill-buffer)
+    (define-key map "q" #'org-roam-treeview-hide-buffer)
+    (define-key map "Q" #'org-roam-treeview-kill-buffer)
     (define-key map "<" #'enlarge-window-horizontally)
     (define-key map ">" #'shrink-window-horizontally)
     (define-key map (kbd "<return>") #'org-roam-treeview--open-line)
@@ -83,13 +83,13 @@ Can be Integer or Real [0.0..1.0]."
   `(let ((inhibit-read-only t))
      ,@forms))
 
-(defun org-roam-treeview--bury-buffer ()
+(defun org-roam-treeview-hide-buffer ()
   "Set the current window-width and bury the buffer"
   (interactive)
   (setq org-roam-treeview--current-width (window-width))
   (bury-buffer))
 
-(defun org-roam-treeview--kill-buffer ()
+(defun org-roam-treeview-kill-buffer ()
   "Set the current window-width and kill the buffer"
   (interactive)
   (setq org-roam-treeview--current-width (window-width))
