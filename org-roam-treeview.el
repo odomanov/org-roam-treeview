@@ -214,6 +214,7 @@ Handles end-of-sublist smartly."
                      ;; (window-width . 0.25) ;org-roam-treeview-width)
                      (window-parameters . ((no-other-window . t)
                                            (no-delete-other-windows . t)))
+                     (dedicated . t)
                      ))))
     (select-window win)
     (when (not org-roam-treeview--current-width)
