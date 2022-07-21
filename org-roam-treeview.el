@@ -1,4 +1,4 @@
-;;; org-roam-treeview.el --- Tree view display for Org-roam
+;;; org-roam-treeview.el --- Tree view display for Org-roam -*- lexical-binding:t -*-
 
 ;; Author: Oleg Domanov <odomanov@yandex.ru>
 ;; Package-Version: 1.0
