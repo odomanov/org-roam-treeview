@@ -257,7 +257,9 @@ Handles end-of-sublist smartly."
          (buf (get-buffer buf-name))
          (win (get-buffer-window buf-name)))
     (cond (win                           ;window is visible
-           (select-window win))
+           (if (eq win (selected-window))
+               (org-roam-treeview-hide-buffer)
+             (select-window win)))
           (buf                           ;buffer exists
            (org-roam-treeview--popup-window buf-name))
           (t                             ;no buffer
