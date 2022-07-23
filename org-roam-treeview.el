@@ -214,7 +214,6 @@ Handles end-of-sublist smartly."
                buf '((side . right)
                      (slot . -1)
                      (window-height . fit-window-to-buffer)
-                     ;; (window-width . 0.25) ;org-roam-treeview-width)
                      (window-parameters . ((no-other-window . t)
                                            (no-delete-other-windows . t)))
                      (dedicated . t)
@@ -244,10 +243,6 @@ Handles end-of-sublist smartly."
             cursor-type nil
             auto-hscroll-mode nil))
     buf))
-
-
-
-;;;;;;;; Install function
 
 ;;;###autoload
 (defun org-roam-treeview ()
