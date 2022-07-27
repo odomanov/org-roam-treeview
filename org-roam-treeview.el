@@ -25,6 +25,11 @@
 (require 'org-roam)
 (require 'dash)
 
+(defgroup org-roam-treeview nil
+  "Presents an Org-roam graph in a tree form."
+    :group 'org-roam
+    :prefix "org-roam-treeview-")
+
 (defcustom org-roam-treeview-startids nil
   "A list of initial IDs for Org-roam Treeview."
   :type '(repeat string)
@@ -41,6 +46,10 @@ Can be Integer or Real [0.0..1.0]."
   :type '(set integer float)
   :group 'org-roam-treeview)
 
+(defcustom org-roam-treeview-hook nil
+  "The hook to start after the package loading."
+  :type 'hook
+  :group 'org-roam-treeview)
 
 (defvar org-roam-treeview-map
   (let ((map (make-sparse-keymap)))
@@ -263,5 +272,7 @@ Handles end-of-sublist smartly."
 
 
 (provide 'org-roam-treeview)
+
+(run-hooks 'org-roam-treeview-hook)
 
 ;;; org-roam-treeview.el ends here
