@@ -48,3 +48,5 @@ You may use the mouse as well.
 - ~org-roam-treeview-width~ :: The initial width of the Org-roam treeview window.
 - ~org-roam-treeview-indent~ :: The indentation of treeview levels.
   The default is ~2~.
+
+~org-roam-treeview-hook~ is the hook to run after the package loading.  
