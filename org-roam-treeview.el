@@ -42,7 +42,7 @@
 
 (defcustom org-roam-treeview-width .25
   "The starting width of Org-roam Treeview window.
-Can be Integer or Real [0.0..1.0]."
+The value should be Integer or Real from 0.0 to 1.0."
   :type '(set integer float)
   :group 'org-roam-treeview)
 
