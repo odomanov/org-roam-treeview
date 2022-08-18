@@ -241,7 +241,9 @@ Handles end-of-sublist smartly."
     (with-current-buffer buf
       (erase-buffer)
       (toggle-truncate-lines 1)
-      (show-paren-local-mode -1)
+      (if (version< emacs-version "28.1")
+          (setq-local show-paren-mode nil) ;workaround
+        (show-paren-local-mode -1))
       (font-lock-mode -1)
       (setq-local header-line-format
                   (format-mode-line (format "    Org-roam") 'org-roam-treeview-title))
