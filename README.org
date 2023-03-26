@@ -33,7 +33,8 @@ Or use ~straight~ (or ~use-package~):
 #+end_src
 
 After that launch ~org-roam-treeview~ (or press ~C-=~ with the
-configuration above).
+configuration above).  This opens a window on the right side which shows
+the tree view of the [[https://www.orgroam.com/][Org-roam]] network.
 
 [[./screenshot.jpg]]
 
