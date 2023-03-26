@@ -32,7 +32,10 @@ Or use ~straight~ (or ~use-package~):
      ))
 #+end_src
 
-After that launch ~org-roam-treeview~ (or press ~C-=~ with the configuration above). 
+After that launch ~org-roam-treeview~ (or press ~C-=~ with the
+configuration above).
+
+[[./screenshot.jpg]]
 
 ** Commands
 
