@@ -183,7 +183,7 @@ Handles end-of-sublist smartly."
   (let* ((id (button-get button :id)))
     ;; from org-roam
     (let* ((node (org-roam-populate (org-roam-node-create :id id)))
-           (buf (org-roam-node-find-noselect node)))
+           (buf (ofind-file-noselect (org-roam-node-file node))))
       (cond
         (buf
          (org-mark-ring-push)
