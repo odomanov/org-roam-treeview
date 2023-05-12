@@ -1,7 +1,7 @@
 ;;; org-roam-treeview.el --- Tree view display for Org-roam -*- lexical-binding:t -*-
 
 ;; Author: Oleg Domanov <odomanov@yandex.ru>
-;; Package-Version: 1.0
+;; Package-Version: 1.1
 ;; Package-Requires: (org-roam dash)
 ;; Keywords: outlines org-roam 
 ;; URL: https://github.com/odomanov/org-roam-treeview
@@ -183,7 +183,7 @@ Handles end-of-sublist smartly."
   (let* ((id (button-get button :id)))
     ;; from org-roam
     (let* ((node (org-roam-populate (org-roam-node-create :id id)))
-           (buf (ofind-file-noselect (org-roam-node-file node))))
+           (buf (find-file-noselect (org-roam-node-file node))))
       (cond
         (buf
          (org-mark-ring-push)
