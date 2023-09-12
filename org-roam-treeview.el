@@ -3,7 +3,7 @@
 ;; Author: Oleg Domanov <odomanov@yandex.ru>
 ;; Package-Version: 1.1
 ;; Package-Requires: (org-roam dash)
-;; Keywords: outlines org-roam 
+;; Keywords: outlines org-roam
 ;; URL: https://github.com/odomanov/org-roam-treeview
 
 ;;; Commentary:
@@ -66,13 +66,13 @@ The value should be Integer or Real from 0.0 to 1.0."
 (defconst org-roam-treeview--buffer-name "Org-roam Treeview"
   "The name of the Org-roam Treeview buffer.")
 
-(defvar org-roam-treeview--current-width nil 
+(defvar org-roam-treeview--current-width nil
   "The current width of the Org-roam Treeview window.  Always integer.")
 
 (define-button-type 'org-roam-treeview-expand
     'action #'org-roam-treeview--expand/contract
     'face nil
-    'help-echo nil) 
+    'help-echo nil)
 
 (define-button-type 'org-roam-treeview-link
     'action #'org-roam-treeview--open
@@ -93,13 +93,13 @@ The value should be Integer or Real from 0.0 to 1.0."
      ,@forms))
 
 (defun org-roam-treeview-hide-buffer ()
-  "Set the current window-width and bury the buffer"
+  "Set the current window-width and bury the buffer."
   (interactive)
   (setq org-roam-treeview--current-width (window-width))
   (bury-buffer))
 
 (defun org-roam-treeview-kill-buffer ()
-  "Set the current window-width and kill the buffer"
+  "Set the current window-width and kill the buffer."
   (interactive)
   (setq org-roam-treeview--current-width (window-width))
   (kill-this-buffer))
@@ -179,7 +179,7 @@ Handles end-of-sublist smartly."
     (select-window win)))
 
 (defun org-roam-treeview--open (button)
-  "Open file with id extracted from BUTTON"
+  "Open file with id extracted from BUTTON."
   (let* ((id (button-get button :id)))
     ;; from org-roam
     (let* ((node (org-roam-populate (org-roam-node-create :id id)))
