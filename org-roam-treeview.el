@@ -93,13 +93,13 @@ The value should be Integer or Real from 0.0 to 1.0."
      ,@forms))
 
 (defun org-roam-treeview-hide-buffer ()
-  "Set the current window-width and bury the buffer."
+  "Set the current `window-width' and bury the buffer."
   (interactive)
   (setq org-roam-treeview--current-width (window-width))
   (bury-buffer))
 
 (defun org-roam-treeview-kill-buffer ()
-  "Set the current window-width and kill the buffer."
+  "Set the current `window-width' and kill the buffer."
   (interactive)
   (setq org-roam-treeview--current-width (window-width))
   (kill-this-buffer))
@@ -272,9 +272,8 @@ Handles end-of-sublist smartly."
            (org-roam-treeview--init)
            (org-roam-treeview--popup-window buf-name)))))
 
+(run-hooks 'org-roam-treeview-hook)
 
 (provide 'org-roam-treeview)
-
-(run-hooks 'org-roam-treeview-hook)
 
 ;;; org-roam-treeview.el ends here
