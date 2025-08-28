@@ -181,19 +181,20 @@ Handles end-of-sublist smartly."
 (defun org-roam-treeview--open (button)
   "Open file with id extracted from BUTTON."
   (let* ((id (button-get button :id)))
-    ;; from org-roam
-    (let* ((node (org-roam-populate (org-roam-node-create :id id)))
-           (buf (find-file-noselect (org-roam-node-file node))))
-      (cond
-        (buf
-         (org-mark-ring-push)
-         ;; (org-roam-node-visit node nil 'force)
-         ;; (display-buffer buf '(display-buffer-reuse-window display-buffer-use-least-recent-window ))
-         (select-window (get-mru-window))
-         (switch-to-buffer buf)
-         (org-roam-treeview--get-focus)
-         t)
-        (t nil)))))
+    (org-roam-id-open id nil)))
+    ;; ;; from org-roam
+    ;; (let* ((node (org-roam-populate (org-roam-node-create :id id)))
+    ;;        (buf (find-file-noselect (org-roam-node-file node))))
+    ;;   (cond
+    ;;     (buf
+    ;;      (org-mark-ring-push)
+    ;;      ;; (org-roam-node-visit node nil 'force)
+    ;;      ;; (display-buffer buf '(display-buffer-reuse-window display-buffer-use-least-recent-window ))
+    ;;      (select-window (get-mru-window))
+    ;;      (switch-to-buffer buf)
+    ;;      (org-roam-treeview--get-focus)
+    ;;      t)
+    ;;     (t nil)))))
 
 (defun org-roam-treeview--open-line ()
   "Find the file corresponding to the current line and open it."
